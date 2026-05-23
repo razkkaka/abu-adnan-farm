@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sistem Peternakan - Abu Adnan Farm</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>if(!localStorage.getItem('ab_token') || JSON.parse(localStorage.getItem('ab_user')).role !== 'admin') window.location.href='/login';</script>
+  <style>body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f0fdf4; }</style>
+</head>
+<body class="flex min-h-screen">
+
+<aside class="w-64 bg-[#14532d] text-white flex flex-col fixed h-full">
+  <div class="p-6 text-xl font-bold border-b border-green-800">AbuAdnan Farm</div>
+  <nav class="flex-1 p-4 space-y-2 text-sm font-medium">
+    <div class="text-green-500/50 text-xs font-bold uppercase tracking-widest mt-4 mb-2 px-4">Menu Utama</div>
+    <a href="#" class="block px-4 py-3 bg-white/10 rounded-lg text-white font-bold">📊 Dashboard Analitik</a>
+    <a href="#" class="block px-4 py-3 hover:bg-white/5 rounded-lg text-green-100">🐄 Data Ternak</a>
+    <a href="#" class="block px-4 py-3 hover:bg-white/5 rounded-lg text-green-100">💊 Kesehatan / Vaksin</a>
+    <a href="#" class="block px-4 py-3 hover:bg-white/5 rounded-lg text-green-100">🌾 Manajemen Pakan</a>
+    <a href="#" class="block px-4 py-3 hover:bg-white/5 rounded-lg text-green-100">🧾 Pesanan Masuk</a>
+  </nav>
+  <div class="p-4 border-t border-green-800"><button onclick="localStorage.clear(); window.location.href='/login'" class="w-full text-left px-4 py-2 text-green-200 hover:text-white">Keluar</button></div>
+</aside>
+
+<main class="flex-1 ml-64 p-8">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-extrabold text-green-950">DASHBOARD</h1>
+    <div class="bg-green-100 text-green-800 px-4 py-2 rounded-full font-bold text-sm">Admin: Pak Adnan</div>
+  </div>
+
+  <div class="grid grid-cols-4 gap-6 mb-8" id="stats-grid">
+    </div>
+
+  <div class="bg-white rounded-2xl shadow-sm border border-green-100 mb-8 overflow-hidden">
+    <div class="p-6 border-b border-green-50 flex justify-between items-center">
+      <h2 class="font-bold text-green-900 text-lg">DAFTAR DATA TERNAK</h2>
+      <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition">+ Tambah Ternak</button>
+    </div>
+    <div class="p-0 overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-green-50/50 text-green-800 border-b border-green-100">
+          <tr><th class="p-4 font-semibold">TAG</th><th class="p-4 font-semibold">JENIS & GAMBAR</th><th class="p-4 font-semibold">BOBOT</th><th class="p-4 font-semibold">UMUR</th><th class="p-4 font-semibold">HARGA</th><th class="p-4 font-semibold">STATUS</th></tr>
+        </thead>
+        <tbody id="table-ternak" class="text-gray-700 font-medium"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow-sm border border-green-100 overflow-hidden">
+    <div class="p-6 border-b border-green-50"><h2 class="font-bold text-green-900 text-lg">INVENTORY STOK PAKAN</h2></div>
+    <div class="p-0 overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-green-50/50 text-green-800 border-b border-green-100"><tr><th class="p-4 font-semibold">JENIS PAKAN</th><th class="p-4 font-semibold">STOK TERSEDIA (Kg)</th><th class="p-4 font-semibold">ESTIMASI HABIS</th></tr></thead>
+        <tbody id="table-pakan" class="text-gray-700 font-medium"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script>
+  const token = localStorage.getItem('ab_token');
+  const headers = {'Authorization': `Bearer ${token}`};
+
+  // Stats
+  fetch('/api/admin/stats', {headers}).then(r=>r.json()).then(d => {
+    const format = (label, val, prefix='') => `<div class="bg-white p-6 rounded-2xl shadow-sm border border-green-100"><div class="text-4xl font-extrabold text-green-700 mb-1">${prefix}${val}</div><div class="text-gray-500 text-sm font-semibold uppercase tracking-wider">${label}</div></div>`;
+    document.getElementById('stats-grid').innerHTML = 
+      format('Total Ternak', d.ternak) + format('Total Sapi', d.sapi) + format('Total Kambing', d.kambing) + format('Total Penjualan', (d.omset/1000000).toFixed(1), 'Rp ') + '<span class="text-xl">M</span>';
+  });
+
+  // Table Ternak
+  fetch('/api/admin/ternak', {headers}).then(r=>r.json()).then(data => {
+    document.getElementById('table-ternak').innerHTML = data.map(t => `
+      <tr class="border-b border-green-50 hover:bg-green-50/30 transition">
+        <td class="p-4 font-bold text-green-900">${t.tag}</td>
+        <td class="p-4 flex items-center gap-3"><img src="${t.image_url}" class="w-10 h-10 rounded-md object-cover border border-gray-200"> ${t.jenis}</td>
+        <td class="p-4">${t.bobot} kg</td><td class="p-4">${t.umur}</td><td class="p-4 font-bold text-green-700">Rp ${t.harga.toLocaleString()}</td>
+        <td class="p-4"><span class="${t.status==='Tersedia'?'bg-emerald-100 text-emerald-800':'bg-amber-100 text-amber-800'} px-3 py-1 rounded-full text-xs font-bold">${t.status}</span></td>
+      </tr>
+    `).join('');
+  });
+
+  // Table Pakan
+  fetch('/api/admin/pakan', {headers}).then(r=>r.json()).then(data => {
+    document.getElementById('table-pakan').innerHTML = data.map(p => `
+      <tr class="border-b border-green-50">
+        <td class="p-4 font-semibold text-gray-800">${p.jenis_pakan}</td><td class="p-4 font-bold">${p.stok_kg} kg</td><td class="p-4 text-amber-600 font-bold">${p.estimasi_hari} Hari</td>
+      </tr>
+    `).join('');
+  });
+</script>
+</body>
+</html>

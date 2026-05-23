@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard Pembeli - Abu Adnan Farm</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>if(!localStorage.getItem('ab_token') || JSON.parse(localStorage.getItem('ab_user')).role === 'admin') window.location.href='/';</script>
+  <style>body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }</style>
+</head>
+<body class="flex min-h-screen">
+
+<aside class="w-64 bg-green-900 text-white flex flex-col">
+  <div class="p-6 text-xl font-bold border-b border-green-800">🐄 AbuAdnan Farm</div>
+  <nav class="flex-1 p-4 space-y-2">
+    <a href="/" class="block px-4 py-3 rounded-lg hover:bg-green-800 transition">Beranda / Marketplace</a>
+    <a href="#" class="block px-4 py-3 bg-green-800 rounded-lg font-semibold">Pesanan Saya</a>
+  </nav>
+  <div class="p-4 border-t border-green-800"><button onclick="localStorage.clear(); window.location.href='/login'" class="w-full text-left px-4 py-2 hover:bg-red-600 rounded-lg">Keluar</button></div>
+</aside>
+
+<main class="flex-1 p-8 overflow-y-auto">
+  <h1 class="text-3xl font-bold text-gray-900 mb-8">Pemesanan & Pembayaran</h1>
+  
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-200 mb-10 overflow-hidden">
+    <div class="p-6 border-b border-gray-200 bg-gray-50 font-bold text-gray-700">Keranjang & Pesanan Aktif Saya</div>
+    <div class="p-6 overflow-x-auto">
+      <table class="w-full text-left">
+        <thead class="text-sm text-gray-500 border-b border-gray-200"><tr><th class="pb-3">ORDER ID</th><th class="pb-3">ITEM</th><th class="pb-3">TOTAL</th><th class="pb-3">STATUS</th></tr></thead>
+        <tbody id="table-pesanan" class="text-gray-800 font-medium"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col h-[500px]">
+    <div class="p-4 border-b border-gray-200 bg-green-800 text-white font-bold rounded-t-2xl flex items-center gap-3">
+      <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div> AdnanBot Support (AI)
+    </div>
+    <div id="chat-box" class="flex-1 p-6 overflow-y-auto space-y-4 bg-gray-50">
+      <div class="bg-white border border-gray-200 p-4 rounded-xl rounded-tl-none w-3/4 shadow-sm text-gray-700">Halo! Saya asisten virtual AbuAdnan. Ada yang bisa saya bantu terkait hewan qurban atau cara pemesanan?</div>
+    </div>
+    <div class="p-4 border-t border-gray-200 bg-white">
+      <div class="flex gap-2">
+        <input type="text" id="chatInput" class="flex-1 bg-gray-100 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-green-600 focus:bg-white transition" placeholder="Ketik pesan disini...">
+        <button onclick="kirimChat()" class="bg-green-700 text-white px-6 rounded-xl font-bold hover:bg-green-800 transition">Kirim</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  const token = localStorage.getItem('ab_token');
+  fetch('/api/pesanan/my', {headers:{'Authorization':`Bearer ${token}`}}).then(r=>r.json()).then(data => {
+    document.getElementById('table-pesanan').innerHTML = data.length ? data.map(o => `
+      <tr class="border-b border-gray-50 last:border-0"><td class="py-4 font-bold text-green-700">#${o.order_id}</td><td class="py-4 flex items-center gap-3"><img src="${o.image_url}" class="w-12 h-12 rounded-lg object-cover"> 1x ${o.jenis} (${o.tag})</td><td class="py-4 font-bold">Rp ${o.total_harga.toLocaleString('id-ID')}</td><td class="py-4"><span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">${o.status}</span> <button class="ml-2 bg-green-600 text-white px-3 py-1 rounded-md text-xs font-bold" onclick="alert('Fitur Upload Bukti Transfer Segera Hadir')">Bayar DP</button></td></tr>
+    `).join('') : '<tr><td colspan="4" class="py-6 text-center text-gray-500">Belum ada pesanan.</td></tr>';
+  });
+
+  async function kirimChat() {
+    const input = document.getElementById('chatInput'); const msg = input.value.trim(); if(!msg) return;
+    const box = document.getElementById('chat-box');
+    box.innerHTML += `<div class="bg-green-700 text-white p-4 rounded-xl rounded-tr-none w-3/4 shadow-sm ml-auto">${msg}</div>`;
+    input.value = ''; box.scrollTop = box.scrollHeight;
+    
+    box.innerHTML += `<div id="loading" class="bg-white border border-gray-200 p-4 rounded-xl rounded-tl-none w-3/4 shadow-sm text-gray-500">Mengetik...</div>`;
+    box.scrollTop = box.scrollHeight;
+
+    const res = await fetch('/api/ai/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({message:msg}) });
+    const data = await res.json();
+    document.getElementById('loading').remove();
+    box.innerHTML += `<div class="bg-white border border-gray-200 p-4 rounded-xl rounded-tl-none w-3/4 shadow-sm text-gray-700">${data.reply}</div>`;
+    box.scrollTop = box.scrollHeight;
+  }
+</script>
+</body>
+</html>

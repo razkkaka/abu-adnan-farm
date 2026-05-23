@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"><title>Login - Abu Adnan Farm</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-green-900 flex items-center justify-center min-h-screen p-4">
+  <div class="bg-white p-8 rounded-2xl w-full max-w-sm shadow-2xl">
+    <div class="text-center mb-8"><div class="text-4xl mb-2">🐄</div><h2 class="text-2xl font-bold text-green-900">AbuAdnan Farm</h2><p class="text-gray-500 text-sm">Digitalisasi Peternakan</p></div>
+    <input type="email" id="email" placeholder="admin@livestock.com" class="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl mb-4 outline-none focus:border-green-500">
+    <input type="password" id="pass" placeholder="admin123" class="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl mb-6 outline-none focus:border-green-500">
+    <button onclick="login()" class="w-full bg-green-700 text-white font-bold py-3 rounded-xl hover:bg-green-800 transition">Masuk Sekarang</button>
+  </div>
+  <script>
+    async function login() {
+      const email = document.getElementById('email').value, password = document.getElementById('pass').value;
+      const res = await fetch('/api/auth/login', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, password})});
+      const d = await res.json();
+      if(res.ok) { localStorage.setItem('ab_token', d.token); localStorage.setItem('ab_user', JSON.stringify(d.user)); window.location.href = d.user.role === 'admin' ? '/admin' : '/dashboard'; } 
+      else alert(d.error);
+    }
+  </script>
+</body>
+</html>
