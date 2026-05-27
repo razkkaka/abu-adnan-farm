@@ -13,7 +13,13 @@ const DB_PATH = './.abufarm.db';
 
 app.use(cors());
 app.use(express.json({limit: '10mb'})); 
-if (!fs.existsSync(path.join(__dirname, 'public'))) fs.mkdirSync(path.join(__dirname, 'public'));
+
+// Pastikan folder public ada
+if (!fs.existsSync(path.join(__dirname, 'public'))) {
+  fs.mkdirSync(path.join(__dirname, 'public'));
+}
+
+// Serve file statis
 app.use(express.static(path.join(__dirname, 'public')));
 
 let db;
@@ -24,8 +30,13 @@ function all(sql, params = []) { const stmt = db.prepare(sql); stmt.bind(params)
 
 async function initDb() {
   const SQL = await initSqlJs();
-  if (fs.existsSync(DB_PATH)) { db = new SQL.Database(fs.readFileSync(DB_PATH)); console.log('✅ Database Ternak Dimuat'); }
-  else { db = new SQL.Database(); console.log('✅ Database Ternak Dibuat'); }
+  if (fs.existsSync(DB_PATH)) { 
+    db = new SQL.Database(fs.readFileSync(DB_PATH)); 
+    console.log('✅ Database Dimuat'); 
+  } else { 
+    db = new SQL.Database(); 
+    console.log('✅ Database Dibuat Baru'); 
+  }
 
   db.run(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT UNIQUE, password TEXT, phone TEXT, role TEXT DEFAULT 'pembeli', created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
   db.run(`CREATE TABLE IF NOT EXISTS ternak (id INTEGER PRIMARY KEY AUTOINCREMENT, tag TEXT UNIQUE, jenis TEXT, bobot INTEGER, umur TEXT, harga INTEGER, kondisi TEXT, image_url TEXT, status TEXT DEFAULT 'Tersedia', deskripsi TEXT, sertifikat INTEGER DEFAULT 0, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
@@ -47,7 +58,6 @@ async function initDb() {
       ['K-045','Kambing Boer', 52, '1 Tahun 8 Bulan', 4200000, 'Sehat', 'https://images.unsplash.com/photo-1588698188151-5b7c0cc247bf?w=500','Kambing Boer import bobot gemuk. Daging tebal.',1],
     ];
     for (const t of T) db.run("INSERT INTO ternak (tag,jenis,bobot,umur,harga,kondisi,image_url,deskripsi,sertifikat) VALUES (?,?,?,?,?,?,?,?,?)", t);
-
     db.run(`INSERT INTO pakan (jenis_pakan, stok_kg, estimasi_hari) VALUES ('Konsentrat Sapi', 150, 5), ('Rumput Odot', 450, 10)`);
     db.run(`INSERT INTO kesehatan (ternak_tag, tanggal, riwayat_sakit, tindakan, jenis_vaksin) VALUES ('S-101', '2024-11-01', '-', 'Vaksinasi Rutin', 'Anthrax')`);
   }
@@ -57,7 +67,7 @@ async function initDb() {
 const auth = (req, res, next) => { const token = req.headers.authorization?.split(' ')[1]; if (!token) return res.status(401).json({ error: 'Akses ditolak' }); try { req.user = jwt.verify(token, JWT_SECRET); next(); } catch { res.status(401).json({ error: 'Sesi habis' }); } };
 const adminOnly = (req, res, next) => { auth(req, res, () => { if (req.user.role !== 'admin') return res.status(403).json({ error: 'Hanya Admin' }); next(); }); };
 
-// AUTH
+// API AUTH
 app.post('/api/auth/register', (req, res) => { 
   const { name, email, password, phone } = req.body; 
   if (!name || !email || !password) return res.status(400).json({error: 'Semua field wajib diisi'});
@@ -72,14 +82,14 @@ app.post('/api/auth/login', (req, res) => {
   res.json({ token: jwt.sign({id:u.id, role:u.role, name:u.name}, JWT_SECRET, {expiresIn:'7d'}), user: {name: u.name, role: u.role, email: u.email} }); 
 });
 
-// PUBLIC
+// API PUBLIC
 app.get('/api/ternak/katalog', (req, res) => { 
   const sql = `SELECT jenis, harga, image_url, deskripsi, sertifikat, COUNT(*) as stok, AVG(bobot) as avg_bobot, MAX(umur) as umur FROM ternak WHERE status='Tersedia' GROUP BY jenis, harga`;
   res.json(all(sql)); 
 });
 app.get('/api/stats/public', (req, res) => { res.json({ total_ternak: get("SELECT COUNT(*) as c FROM ternak WHERE status='Tersedia'")?.c||0, total_terjual: get("SELECT COUNT(*) as c FROM pesanan WHERE status='Lunas'")?.c||0, total_pelanggan: get("SELECT COUNT(*) as c FROM users WHERE role='pembeli'")?.c||0 }); });
 
-// BUYER
+// API PEMBELI (SISTEM MULTI STOK)
 app.post('/api/pesanan', auth, (req, res) => {
   const { jenis, jumlah, catatan } = req.body;
   const qty = parseInt(jumlah);
@@ -99,8 +109,9 @@ app.post('/api/pesanan', auth, (req, res) => {
 });
 app.get('/api/pesanan/my', auth, (req, res) => { res.json(all("SELECT * FROM pesanan WHERE user_id=? ORDER BY id DESC", [req.user.id])); });
 
-// ADMIN
+// API ADMIN (FULL CRUD EDIT HAPUS)
 app.get('/api/admin/stats', adminOnly, (req, res) => { res.json({ ternak: get("SELECT COUNT(*) as c FROM ternak")?.c||0, tersedia: get("SELECT COUNT(*) as c FROM ternak WHERE status='Tersedia'")?.c||0, pesanan_pending: get("SELECT COUNT(*) as c FROM pesanan WHERE status='Menunggu Pembayaran'")?.c||0, total_users: get("SELECT COUNT(*) as c FROM users WHERE role='pembeli'")?.c||0 }); });
+
 app.get('/api/admin/ternak', adminOnly, (req, res) => { res.json(all("SELECT * FROM ternak ORDER BY id DESC")); });
 app.post('/api/admin/ternak', adminOnly, (req, res) => { const b = req.body; run("INSERT INTO ternak (tag,jenis,bobot,umur,harga,kondisi,image_url,deskripsi,sertifikat) VALUES (?,?,?,?,?,?,?,?,?)", [b.tag,b.jenis,b.bobot,b.umur,b.harga,b.kondisi||'Sehat',b.image_url||'',b.deskripsi||'',b.sertifikat||0]); res.json({success:true}); });
 app.put('/api/admin/ternak/:id', adminOnly, (req, res) => { const b = req.body; run("UPDATE ternak SET tag=?, jenis=?, bobot=?, umur=?, harga=?, status=?, image_url=? WHERE id=?", [b.tag, b.jenis, b.bobot, b.umur, b.harga, b.status, b.image_url, req.params.id]); res.json({success:true}); });
@@ -134,7 +145,7 @@ app.get('/api/admin/users', adminOnly, (req, res) => { res.json(all("SELECT id,n
 app.put('/api/admin/users/:id', adminOnly, (req, res) => { run("UPDATE users SET name=?, email=?, phone=?, role=? WHERE id=?", [req.body.name, req.body.email, req.body.phone, req.body.role, req.params.id]); res.json({success:true}); });
 app.delete('/api/admin/users/:id', adminOnly, (req, res) => { run("DELETE FROM users WHERE id=?", [req.params.id]); res.json({success:true}); });
 
-// AI CHATBOT (DIKEMBALIKAN)
+// API AI CHATBOT
 app.post('/api/ai/chat', async (req, res) => {
   const { message } = req.body;
   const info = all("SELECT jenis, harga, COUNT(*) as stok FROM ternak WHERE status='Tersedia' GROUP BY jenis, harga");
@@ -143,9 +154,7 @@ app.post('/api/ai/chat', async (req, res) => {
   
   try {
     const key = process.env.GROQ_API_KEY;
-    if (!key) {
-      return res.json({reply: autoReply(message.toLowerCase())});
-    }
+    if (!key) { return res.json({reply: autoReply(message.toLowerCase())}); }
     const r = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{ 'Authorization':`Bearer ${key}`, 'Content-Type':'application/json'}, body: JSON.stringify({ model: "llama-3.1-8b-instant", messages: [{role:"user", content: prompt}] }) });
     const d = await r.json();
     res.json({reply: d.choices[0].message.content});
@@ -157,14 +166,16 @@ function autoReply(msg) {
   if (msg.includes('sapi')) return 'Kami memiliki beberapa jenis sapi tersedia: Limousin, Bali, dan Simental. Semua divaksin! 🐄';
   if (msg.includes('kambing') || msg.includes('domba')) return 'Kami menyediakan Kambing Etawa dan Boer. Semuanya sehat dan layak qurban! 🐐';
   if (msg.includes('pesan') || msg.includes('beli') || msg.includes('order')) return 'Cara memesan: 1) Login/Daftar, 2) Pilih hewan di Marketplace, 3) Masukkan jumlah, 4) Klik "Konfirmasi Pesanan", 5) Bayar DP via Transfer. Mudah kan? 😊';
-  if (msg.includes('bayar') || msg.includes('dp') || msg.includes('transfer')) return 'Kami menerima pembayaran via Transfer Bank (BCA/Mandiri/BRI). DP minimal 30% untuk konfirmasi pesanan.';
-  if (msg.includes('vaksin') || msg.includes('sehat') || msg.includes('kesehatan')) return 'Semua hewan kami sudah melalui pemeriksaan veteriner dan vaksinasi lengkap. Kami juga menyertakan sertifikat kesehatan untuk hewan premium! ✅';
-  if (msg.includes('lokasi') || msg.includes('alamat') || msg.includes('kandang')) return 'Kandang kami berlokasi di Bogor, Jawa Barat. Pembeli bisa melakukan kunjungan langsung untuk melihat hewan sebelum membeli.';
-  if (msg.includes('halo') || msg.includes('hai') || msg.includes('hi')) return 'Halo! Selamat datang di Abu Farm 🐄 Ada yang bisa saya bantu? Anda bisa tanya tentang harga, cara pesan, atau ketersediaan stok!';
   return 'Terima kasih pertanyaannya! Untuk informasi lebih lanjut, silakan hubungi WhatsApp kami atau kunjungi halaman Marketplace.';
 }
 
+// ROUTING UTAMA (MEMASTIKAN ALAMAT URL TIDAK NYASAR)
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
-['/dashboard', '/admin', '/login'].forEach(r => app.get(r, (req, res) => res.sendFile(path.join(__dirname, 'public', r + '.html'))));
+app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
+app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
+
+// Fallback kalau url ngaco dilempar ke beranda
+app.get('*', (req, res) => res.redirect('/'));
 
 initDb().then(() => app.listen(PORT, () => console.log(`🚀 Abu Farm running on port ${PORT}`)));

@@ -1,88 +1,167 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Masuk / Daftar - Abu Farm</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Abu Farm - Hewan Qurban Terpercaya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    :root { --green: #15803d; }
-    body { font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; background-color: #f0fdf4; overflow-y: auto; overflow-x: hidden;}
-    .hero-bg { background: linear-gradient(135deg, rgba(5,46,22,0.92), rgba(20,83,45,0.88)), url('https://images.unsplash.com/photo-1500595046743-cd271d694d30?q=80&w=2000') center/cover; }
-    .glass { background: rgba(255,255,255,0.97); backdrop-filter: blur(20px); }
-    .tab-active { background: var(--green); color: white; }
-    .tab-inactive { background: transparent; color: #6b7280; }
-    input:focus { border-color: var(--green) !important; outline: none; box-shadow: 0 0 0 3px rgba(21,128,61,0.12); }
-    .btn-primary { background: var(--green); transition: all 0.2s; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #0f172a; }
+    .bg-farm { background: linear-gradient(165deg, rgba(5,46,22,0.93) 0%, rgba(20,83,45,0.88) 50%, rgba(2,44,34,0.96) 100%), url('https://images.unsplash.com/photo-1500595046743-cd271d694d30?q=80&w=2000') center/cover; }
+    .glass-nav { background: rgba(255,255,255,0.92); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(226,232,240,0.8); }
+    .card-ternak { transition: all 0.3s cubic-bezier(0.4,0,0.2,1); }
+    .card-ternak:hover { transform: translateY(-6px); box-shadow: 0 24px 48px rgba(0,0,0,0.12); }
+    .badge-sertif { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+    .filter-btn.active { background: #15803d; color: white; }
+    .modal-overlay { background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+    .btn-pesan { background: linear-gradient(135deg, #15803d, #166534); transition: all 0.2s; }
+    .btn-pesan:hover { background: linear-gradient(135deg, #16a34a, #15803d); transform: translateY(-1px); box-shadow: 0 8px 20px rgba(21,128,61,0.4); }
   </style>
 </head>
-<body class="min-h-screen flex">
-  <div class="hero-bg hidden md:flex flex-col justify-center p-16 w-1/2 sticky top-0 h-screen">
-    <div class="flex items-center gap-3 mb-8"><div class="bg-green-500 text-white w-12 h-12 rounded-xl flex items-center justify-center shadow text-2xl">🐄</div><span class="text-white font-bold text-xl">Abu Farm</span></div>
-    <h1 class="text-5xl font-bold text-white mb-4 leading-tight" style="font-family:'Playfair Display',serif;">Hewan Qurban<br>Terpercaya</h1>
-    <p class="text-green-100 text-lg leading-relaxed">Platform digital untuk melacak dan memesan hewan qurban langsung dari kandang Bogor.</p>
+<body>
+
+<nav class="fixed top-0 w-full glass-nav z-50">
+  <div class="max-w-7xl mx-auto px-6 h-18 py-3 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-3 text-xl font-bold text-green-900">
+      <div class="bg-green-700 text-white px-3 py-2 rounded-xl text-lg shadow-sm">🐄</div>
+      <div><div class="font-extrabold text-green-900 text-lg leading-none">Abu</div><div class="text-green-600 text-xs font-semibold tracking-wide">FARM</div></div>
+    </a>
+    <div id="auth-buttons" class="flex gap-3 items-center"></div>
   </div>
+</nav>
 
-  <div class="glass flex flex-col items-center py-12 px-6 w-full md:w-1/2 min-h-screen">
-    <div class="w-full max-w-md my-auto">
-      <div class="md:hidden text-center mb-8"><div class="text-4xl mb-2">🐄</div><div class="font-bold text-green-900 text-xl">Abu Farm</div></div>
-      <h2 class="text-3xl font-bold text-gray-900 mb-2" style="font-family:'Playfair Display',serif;">Selamat Datang</h2>
-      <p class="text-gray-500 mb-8 text-sm">Masuk atau buat akun baru untuk memesan</p>
-
-      <div class="flex bg-gray-100 rounded-xl p-1 mb-8">
-        <button id="tab-login" onclick="switchTab('login')" class="flex-1 py-2.5 rounded-lg text-sm font-semibold tab-active">Masuk</button>
-        <button id="tab-register" onclick="switchTab('register')" class="flex-1 py-2.5 rounded-lg text-sm font-semibold tab-inactive">Daftar Akun</button>
-      </div>
-
-      <div id="form-login">
-        <div class="space-y-4">
-          <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Email</label><input type="email" id="login-email" class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-sm font-medium"></div>
-          <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Password</label><input type="password" id="login-pass" class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-sm font-medium"></div>
-        </div>
-        <div id="login-error" class="hidden mt-3 bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl border border-red-100"></div>
-        <button onclick="doLogin()" id="btn-login" class="btn-primary w-full mt-6 py-4 rounded-xl text-white font-bold text-sm shadow-lg">Masuk Sekarang →</button>
-      </div>
-
-      <div id="form-register" class="hidden">
-        <div class="space-y-4">
-          <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Nama Lengkap</label><input type="text" id="reg-name" class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-sm"></div>
-          <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Email</label><input type="email" id="reg-email" class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-sm"></div>
-          <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Password</label><input type="password" id="reg-pass" class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-sm"></div>
-        </div>
-        <div id="reg-error" class="hidden mt-3 bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl"></div>
-        <button onclick="doRegister()" id="btn-register" class="btn-primary w-full mt-6 py-4 rounded-xl text-white font-bold text-sm shadow-lg">Buat Akun Gratis →</button>
-      </div>
-      <div class="text-center mt-6"><a href="/" class="text-sm text-green-600 hover:underline">Kembali ke Beranda</a></div>
+<section class="bg-farm min-h-screen flex items-center justify-center text-center px-4 pt-20">
+  <div class="max-w-5xl relative">
+    <h1 class="text-5xl md:text-7xl font-extrabold text-white mb-6" style="font-family:'Playfair Display',serif;">
+      Hewan Qurban Sehat,<br><span class="text-green-400 italic">Langsung dari Kandang.</span>
+    </h1>
+    <p class="text-lg text-green-100/90 mb-10 max-w-2xl mx-auto font-medium">Pilih, pesan, dan pantau hewan qurban Anda secara digital.</p>
+    <div class="flex gap-4 justify-center flex-wrap">
+      <a href="#katalog" class="bg-green-600 hover:bg-green-500 text-white px-8 py-4 rounded-xl font-bold transition-all">Lihat Katalog ➔</a>
+      <a href="/login" id="hero-daftar-btn" class="bg-white/10 hover:bg-white/20 border border-white/30 text-white px-8 py-4 rounded-xl font-bold backdrop-blur-sm transition-all">Daftar Gratis</a>
     </div>
   </div>
+</section>
+
+<section id="katalog" class="py-24 max-w-7xl mx-auto px-6">
+  <div class="text-center mb-12">
+    <h2 class="text-4xl font-extrabold text-gray-900 mb-4" style="font-family:'Playfair Display',serif;">Pilih Hewan Qurban Anda</h2>
+  </div>
+  <div class="flex gap-3 justify-center mb-10 flex-wrap">
+    <button class="filter-btn active px-6 py-2.5 rounded-xl text-sm font-bold border border-green-200" onclick="filterTernak('semua', this)">Semua Hewan</button>
+    <button class="filter-btn px-6 py-2.5 rounded-xl text-sm font-bold bg-gray-100 border border-gray-200" onclick="filterTernak('sapi', this)">🐄 Sapi</button>
+    <button class="filter-btn px-6 py-2.5 rounded-xl text-sm font-bold bg-gray-100 border border-gray-200" onclick="filterTernak('kambing', this)">🐐 Kambing & Domba</button>
+  </div>
+  <div id="grid-ternak" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+</section>
+
+<!-- MODAL KONFIRMASI (POP UP QTY) -->
+<div id="modal" class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4" onclick="closeModal(event)">
+  <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden" onclick="event.stopPropagation()">
+    <img id="m-img" src="" class="w-full h-48 object-cover">
+    <div class="p-6">
+      <h3 class="text-2xl font-extrabold text-gray-900 mb-1" id="m-nama"></h3>
+      <div class="text-sm font-semibold text-green-700 mb-4">Stok Tersedia: <span id="m-stok"></span> Ekor</div>
+      
+      <div class="grid grid-cols-2 gap-3 mb-5">
+        <div class="bg-gray-50 rounded-xl p-3 text-center"><div class="text-xs text-gray-500 font-semibold mb-0.5">Est. Bobot</div><div class="font-bold text-gray-900" id="m-bobot"></div></div>
+        <div class="bg-gray-50 rounded-xl p-3 text-center"><div class="text-xs text-gray-500 font-semibold mb-0.5">Maks. Umur</div><div class="font-bold text-gray-900" id="m-umur"></div></div>
+      </div>
+      
+      <div class="mb-5">
+        <label class="block text-sm font-bold text-gray-700 mb-2">Jumlah Pembelian (Ekor)</label>
+        <input type="number" id="m-qty" min="1" value="1" class="w-full border border-gray-200 rounded-xl px-4 py-3 font-bold text-lg" onchange="calcTotal()">
+      </div>
+
+      <div class="flex justify-between items-center bg-gray-50 p-4 rounded-xl mb-5">
+        <div class="text-sm text-gray-500 font-bold">Total Harga</div>
+        <div class="text-xl font-extrabold text-green-700" id="m-total"></div>
+      </div>
+      
+      <button onclick="pesanTernak()" class="btn-pesan w-full text-white py-4 rounded-xl font-bold text-sm shadow-lg">Konfirmasi Pesanan →</button>
+    </div>
+  </div>
+</div>
 
 <script>
-  function switchTab(t) {
-    document.getElementById('form-login').classList.toggle('hidden', t!=='login');
-    document.getElementById('form-register').classList.toggle('hidden', t==='login');
-    document.getElementById('tab-login').className = `flex-1 py-2.5 rounded-lg text-sm font-semibold ${t==='login'?'tab-active':'tab-inactive'}`;
-    document.getElementById('tab-register').className = `flex-1 py-2.5 rounded-lg text-sm font-semibold ${t!=='login'?'tab-active':'tab-inactive'}`;
+  const token = localStorage.getItem('ab_token');
+  const user = JSON.parse(localStorage.getItem('ab_user') || 'null');
+
+  if (token && user) {
+    document.getElementById('hero-daftar-btn').classList.add('hidden'); // Sembunyikan daftar gratis
+    document.getElementById('auth-buttons').innerHTML = `
+      <span class="font-semibold text-gray-600">Halo, ${user.name.split(' ')[0]}</span>
+      <a href="${user.role==='admin'?'/admin':'/dashboard'}" class="px-5 py-2.5 rounded-xl font-bold bg-green-700 text-white hover:bg-green-600 text-sm">Dashboard</a>
+    `;
+  } else {
+    document.getElementById('auth-buttons').innerHTML = `<a href="/login" class="px-5 py-2.5 rounded-xl font-bold bg-green-700 text-white hover:bg-green-600 text-sm">Masuk / Daftar</a>`;
   }
 
-  async function doLogin() {
-    const btn = document.getElementById('btn-login'); btn.textContent = 'Memproses...';
+  let allTernak = [];
+  let currentTernak = null;
+
+  fetch('/api/ternak/katalog').then(r=>r.json()).then(data => { allTernak = data; renderTernak(data); });
+
+  function renderTernak(data) {
+    document.getElementById('grid-ternak').innerHTML = data.map((t, i) => `
+      <div class="card-ternak bg-white rounded-2xl border border-gray-200 overflow-hidden cursor-pointer" onclick="openModal(${i})">
+        <div class="relative h-48 bg-gray-100"><img src="${t.image_url}" class="w-full h-full object-cover"></div>
+        <div class="p-5 text-center">
+          <h3 class="font-extrabold text-gray-900 text-lg mb-1">${t.jenis}</h3>
+          <div class="text-xs font-semibold text-green-600 mb-3">Tersedia ${t.stok} Ekor</div>
+          <div class="text-xl font-extrabold text-gray-900 mb-4">Rp ${t.harga.toLocaleString('id-ID')}</div>
+          <button class="btn-pesan w-full text-white font-bold py-2.5 rounded-xl text-sm">Beli / Detail</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function filterTernak(type, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => { b.classList.remove('active'); b.classList.add('bg-gray-100'); });
+    btn.classList.add('active'); btn.classList.remove('bg-gray-100');
+    let res = allTernak;
+    if (type === 'sapi') res = allTernak.filter(t => t.jenis.toLowerCase().includes('sapi'));
+    else if (type === 'kambing') res = allTernak.filter(t => t.jenis.toLowerCase().includes('kambing') || t.jenis.toLowerCase().includes('domba'));
+    renderTernak(res);
+  }
+
+  function openModal(idx) {
+    currentTernak = allTernak[idx];
+    document.getElementById('m-img').src = currentTernak.image_url;
+    document.getElementById('m-nama').textContent = currentTernak.jenis;
+    document.getElementById('m-stok').textContent = currentTernak.stok;
+    document.getElementById('m-bobot').textContent = '~' + Math.round(currentTernak.avg_bobot) + ' kg';
+    document.getElementById('m-umur').textContent = currentTernak.umur;
+    document.getElementById('m-qty').value = 1;
+    document.getElementById('m-qty').max = currentTernak.stok;
+    calcTotal();
+    document.getElementById('modal').classList.remove('hidden');
+  }
+  
+  function calcTotal() {
+    let q = parseInt(document.getElementById('m-qty').value) || 1;
+    if(q > currentTernak.stok) { q = currentTernak.stok; document.getElementById('m-qty').value = q; }
+    document.getElementById('m-total').textContent = 'Rp ' + (currentTernak.harga * q).toLocaleString('id-ID');
+  }
+
+  function closeModal(e) { document.getElementById('modal').classList.add('hidden'); }
+
+  async function pesanTernak() {
+    if (!token) { window.location.href = '/login'; return; }
+    if (user.role === 'admin') { alert('Admin tidak bisa melakukan pemesanan.'); return; }
+    const qty = document.getElementById('m-qty').value;
+    
     try {
-      const res = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email: document.getElementById('login-email').value, password: document.getElementById('login-pass').value}) });
+      const res = await fetch('/api/pesanan', { 
+        method:'POST', 
+        headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`}, 
+        body: JSON.stringify({ jenis: currentTernak.jenis, jumlah: qty }) 
+      });
       const d = await res.json();
-      if(res.ok) { localStorage.setItem('ab_token', d.token); localStorage.setItem('ab_user', JSON.stringify(d.user)); window.location.href = d.user.role === 'admin' ? '/admin' : '/dashboard'; }
-      else { document.getElementById('login-error').textContent = d.error; document.getElementById('login-error').classList.remove('hidden'); btn.textContent = 'Masuk Sekarang →'; }
-    } catch(e) { btn.textContent = 'Masuk Sekarang →'; }
-  }
-
-  async function doRegister() {
-    const btn = document.getElementById('btn-register'); btn.textContent = 'Memproses...';
-    try {
-      const res = await fetch('/api/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name: document.getElementById('reg-name').value, email: document.getElementById('reg-email').value, password: document.getElementById('reg-pass').value}) });
-      if(res.ok) { alert('Berhasil daftar! Silakan masuk.'); switchTab('login'); }
-      else { const d = await res.json(); document.getElementById('reg-error').textContent = d.error; document.getElementById('reg-error').classList.remove('hidden'); }
-      btn.textContent = 'Buat Akun Gratis →';
-    } catch(e) { btn.textContent = 'Buat Akun Gratis →'; }
+      if (res.ok) { alert('✅ Pesanan berhasil dicatat!\nOrder ID: ' + d.order_id); window.location.href = '/dashboard'; }
+      else alert('❌ ' + d.error);
+    } catch(e) { alert('Koneksi bermasalah.'); }
   }
 </script>
 </body>

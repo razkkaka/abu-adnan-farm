@@ -24,7 +24,7 @@
     <p class="text-green-100 text-lg leading-relaxed">Platform digital untuk melacak dan memesan hewan qurban langsung dari kandang Bogor.</p>
   </div>
 
-  <div class="glass flex flex-col items-center py-12 px-6 w-full md:w-1/2 min-h-screen">
+  <div class="glass flex flex-col items-center py-12 px-6 w-full md:w-1/2 min-h-screen relative">
     <div class="w-full max-w-md my-auto">
       <div class="md:hidden text-center mb-8"><div class="text-4xl mb-2">🐄</div><div class="font-bold text-green-900 text-xl">Abu Farm</div></div>
       <h2 class="text-3xl font-bold text-gray-900 mb-2" style="font-family:'Playfair Display',serif;">Selamat Datang</h2>
@@ -35,6 +35,7 @@
         <button id="tab-register" onclick="switchTab('register')" class="flex-1 py-2.5 rounded-lg text-sm font-semibold tab-inactive">Daftar Akun</button>
       </div>
 
+      <!-- FORM LOGIN -->
       <div id="form-login">
         <div class="space-y-4">
           <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Email</label><input type="email" id="login-email" class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-sm font-medium"></div>
@@ -44,6 +45,7 @@
         <button onclick="doLogin()" id="btn-login" class="btn-primary w-full mt-6 py-4 rounded-xl text-white font-bold text-sm shadow-lg">Masuk Sekarang →</button>
       </div>
 
+      <!-- FORM REGISTER -->
       <div id="form-register" class="hidden">
         <div class="space-y-4">
           <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Nama Lengkap</label><input type="text" id="reg-name" class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-sm"></div>
@@ -53,7 +55,11 @@
         <div id="reg-error" class="hidden mt-3 bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl"></div>
         <button onclick="doRegister()" id="btn-register" class="btn-primary w-full mt-6 py-4 rounded-xl text-white font-bold text-sm shadow-lg">Buat Akun Gratis →</button>
       </div>
-      <div class="text-center mt-6"><a href="/" class="text-sm text-green-600 hover:underline">Kembali ke Beranda</a></div>
+      
+      <!-- TOMBOL KEMBALI JELAS -->
+      <div class="text-center mt-10">
+        <a href="/" class="text-sm font-bold text-green-700 hover:text-green-800 hover:underline">← Kembali ke Beranda</a>
+      </div>
     </div>
   </div>
 
