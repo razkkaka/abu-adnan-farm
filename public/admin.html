@@ -1,343 +1,189 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <title>Admin Panel - AbuAdnan Farm</title>
+  <meta charset="UTF-8">
+  <title>Admin Panel - Abu Farm</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    const _u = localStorage.getItem('ab_user');
-    if(!localStorage.getItem('ab_token') || !_u || JSON.parse(_u).role !== 'admin') window.location.href='/login';
-  </script>
-  <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f0fdf4; }
-    .sidebar-link { transition: all 0.15s; }
-    .sidebar-link.active { background: rgba(255,255,255,0.15); color: white; font-weight: 700; }
-    .sidebar-link:not(.active):hover { background: rgba(255,255,255,0.07); }
-    .stat-card { transition: all 0.2s; }
-    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
-    .modal-bg { background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: #15803d; box-shadow: 0 0 0 3px rgba(21,128,61,0.1); }
-  </style>
+  <script>if(!localStorage.getItem('ab_token') || JSON.parse(localStorage.getItem('ab_user')).role !== 'admin') window.location.href='/login';</script>
+  <style>.modal-bg { background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }</style>
 </head>
-<body class="flex min-h-screen">
+<body class="flex min-h-screen bg-green-50 font-[Plus_Jakarta_Sans]">
 
-<!-- SIDEBAR -->
-<aside class="w-64 bg-gradient-to-b from-[#052e16] to-[#14532d] text-white flex flex-col fixed h-full z-20 shadow-2xl">
-  <div class="p-6 border-b border-green-800">
-    <div class="flex items-center gap-3">
-      <div class="bg-green-500 text-white w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow">🐄</div>
-      <div><div class="font-extrabold text-lg leading-none">AbuAdnan</div><div class="text-green-400 text-xs font-semibold">FARM ADMIN</div></div>
-    </div>
+<aside class="w-64 bg-green-950 text-white flex flex-col fixed h-full z-20">
+  <div class="p-6 border-b border-green-800 flex items-center gap-3">
+    <div class="bg-green-500 text-white w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow">🐄</div>
+    <div><div class="font-extrabold text-lg leading-none">Abu Farm</div></div>
   </div>
-  <nav class="flex-1 p-4 space-y-1 text-sm">
-    <div class="text-green-500/60 text-xs font-bold uppercase tracking-widest mt-4 mb-2 px-3">Dashboard</div>
-    <a href="#" onclick="showSection('overview')" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-lg text-green-100">📊 Overview</a>
-    <div class="text-green-500/60 text-xs font-bold uppercase tracking-widest mt-5 mb-2 px-3">Manajemen</div>
-    <a href="#" onclick="showSection('ternak')" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-green-100">🐄 Data Ternak</a>
-    <a href="#" onclick="showSection('pesanan')" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-green-100">🧾 Pesanan <span id="badge-pesanan" class="ml-auto bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center hidden"></span></a>
-    <a href="#" onclick="showSection('users')" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-green-100">👥 Pengguna</a>
-    <a href="#" onclick="showSection('pakan')" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-green-100">🌾 Stok Pakan</a>
-    <a href="#" onclick="showSection('kesehatan')" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-green-100">💊 Kesehatan</a>
+  <nav class="flex-1 p-4 space-y-2 text-sm mt-4">
+    <button onclick="nav('overview')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-green-800 bg-green-800 font-bold">📊 Overview</button>
+    <button onclick="nav('ternak')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-green-800">🐄 Data Ternak</button>
+    <button onclick="nav('pesanan')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-green-800">🧾 Pesanan</button>
+    <button onclick="nav('users')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-green-800">👥 Pengguna</button>
+    <button onclick="nav('pakan')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-green-800">🌾 Stok Pakan</button>
+    <button onclick="nav('kesehatan')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-green-800">💊 Kesehatan</button>
   </nav>
-  <div class="p-4 border-t border-green-800">
-    <div class="text-green-300 text-xs mb-3 px-3">Login sebagai <span class="font-bold text-white">Pak Adnan</span></div>
-    <button onclick="localStorage.clear(); window.location.href='/login'" class="w-full text-left px-3 py-2 text-green-300 hover:text-white hover:bg-red-600/20 rounded-lg text-sm transition">🚪 Keluar</button>
-  </div>
 </aside>
 
-<!-- MAIN CONTENT -->
-<main class="flex-1 ml-64 min-h-screen">
-
-  <!-- Header -->
-  <div class="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-10 flex justify-between items-center">
-    <h1 class="text-xl font-extrabold text-gray-900" id="page-title">Dashboard Overview</h1>
-    <div class="flex items-center gap-4">
-      <div class="text-sm text-gray-500" id="current-time"></div>
-      <div class="bg-green-100 text-green-800 px-4 py-1.5 rounded-full font-bold text-sm">Admin Panel</div>
-    </div>
-  </div>
-
-  <!-- OVERVIEW SECTION -->
-  <div id="sec-overview" class="p-8">
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-5 mb-8" id="stats-grid"></div>
-
-    <div class="grid grid-cols-3 gap-6">
-      <!-- Ternak Table mini -->
-      <div class="col-span-2 bg-white rounded-2xl shadow-sm border border-green-100 overflow-hidden">
-        <div class="p-5 border-b border-gray-100 flex justify-between items-center">
-          <h2 class="font-bold text-gray-900">Ternak Terbaru</h2>
-          <button onclick="showSection('ternak')" class="text-green-700 text-sm font-semibold hover:underline">Lihat Semua →</button>
-        </div>
-        <div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-gray-50 text-gray-500"><tr><th class="px-4 py-3 text-left">TAG</th><th class="px-4 py-3 text-left">JENIS</th><th class="px-4 py-3 text-left">BOBOT</th><th class="px-4 py-3 text-left">HARGA</th><th class="px-4 py-3 text-left">STATUS</th></tr></thead>
-        <tbody id="overview-ternak" class="text-gray-700"></tbody></table></div>
-      </div>
-
-      <!-- Quick actions -->
-      <div class="bg-white rounded-2xl shadow-sm border border-green-100 p-5">
-        <h2 class="font-bold text-gray-900 mb-4">Aksi Cepat</h2>
-        <div class="space-y-3">
-          <button onclick="openTambahModal()" class="w-full bg-green-700 hover:bg-green-600 text-white px-4 py-3 rounded-xl text-sm font-bold transition flex items-center gap-2">
-            ➕ Tambah Data Ternak
-          </button>
-          <button onclick="showSection('pesanan')" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-3 rounded-xl text-sm font-bold transition flex items-center gap-2">
-            🧾 Kelola Pesanan
-          </button>
-          <button onclick="showSection('pakan')" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-700 px-4 py-3 rounded-xl text-sm font-bold transition flex items-center gap-2">
-            🌾 Update Stok Pakan
-          </button>
-        </div>
-        <div class="mt-5 bg-green-50 rounded-xl p-4">
-          <div class="text-xs font-bold text-green-800 mb-2">Info Kandang</div>
-          <div class="text-xs text-green-700 space-y-1">
-            <div>📍 Bogor, Jawa Barat</div>
-            <div>📞 WA: 0812-xxxx-xxxx</div>
-            <div>📧 admin@livestock.com</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TERNAK SECTION -->
-  <div id="sec-ternak" class="p-8 hidden">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-lg font-bold text-gray-900">Semua Data Ternak</h2>
-      <button onclick="openTambahModal()" class="bg-green-700 hover:bg-green-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm transition">+ Tambah Ternak</button>
-    </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-green-100 overflow-hidden">
-      <table class="w-full text-sm"><thead class="bg-gray-50 text-gray-500 border-b"><tr><th class="px-4 py-3 text-left">TAG</th><th class="px-4 py-3 text-left">HEWAN</th><th class="px-4 py-3 text-left">BOBOT</th><th class="px-4 py-3 text-left">HARGA</th><th class="px-4 py-3 text-left">STATUS</th><th class="px-4 py-3 text-left">AKSI</th></tr></thead>
-      <tbody id="table-ternak" class="text-gray-700"></tbody></table>
-    </div>
-  </div>
-
-  <!-- PESANAN SECTION -->
-  <div id="sec-pesanan" class="p-8 hidden">
-    <h2 class="text-lg font-bold text-gray-900 mb-6">Manajemen Pesanan</h2>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-      <table class="w-full text-sm"><thead class="bg-gray-50 text-gray-500 border-b"><tr><th class="px-4 py-3 text-left">ORDER ID</th><th class="px-4 py-3 text-left">PEMBELI</th><th class="px-4 py-3 text-left">HEWAN</th><th class="px-4 py-3 text-left">TOTAL</th><th class="px-4 py-3 text-left">STATUS</th><th class="px-4 py-3 text-left">AKSI</th></tr></thead>
-      <tbody id="table-pesanan" class="text-gray-700"></tbody></table>
-    </div>
-  </div>
-
-  <!-- USERS SECTION -->
-  <div id="sec-users" class="p-8 hidden">
-    <h2 class="text-lg font-bold text-gray-900 mb-6">Daftar Pengguna</h2>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-      <table class="w-full text-sm"><thead class="bg-gray-50 text-gray-500 border-b"><tr><th class="px-4 py-3 text-left">NAMA</th><th class="px-4 py-3 text-left">EMAIL</th><th class="px-4 py-3 text-left">NO HP</th><th class="px-4 py-3 text-left">ROLE</th><th class="px-4 py-3 text-left">DAFTAR</th></tr></thead>
-      <tbody id="table-users" class="text-gray-700"></tbody></table>
-    </div>
-  </div>
-
-  <!-- PAKAN SECTION -->
-  <div id="sec-pakan" class="p-8 hidden">
-    <h2 class="text-lg font-bold text-gray-900 mb-6">Inventory Stok Pakan</h2>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-      <table class="w-full text-sm"><thead class="bg-gray-50 text-gray-500 border-b"><tr><th class="px-4 py-3 text-left">JENIS PAKAN</th><th class="px-4 py-3 text-left">STOK (Kg)</th><th class="px-4 py-3 text-left">ESTIMASI HABIS</th><th class="px-4 py-3 text-left">STATUS</th></tr></thead>
-      <tbody id="table-pakan" class="text-gray-700"></tbody></table>
-    </div>
-  </div>
-
-  <!-- KESEHATAN SECTION -->
-  <div id="sec-kesehatan" class="p-8 hidden">
-    <h2 class="text-lg font-bold text-gray-900 mb-6">Riwayat Kesehatan Ternak</h2>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-      <table class="w-full text-sm"><thead class="bg-gray-50 text-gray-500 border-b"><tr><th class="px-4 py-3 text-left">TAG TERNAK</th><th class="px-4 py-3 text-left">TANGGAL</th><th class="px-4 py-3 text-left">RIWAYAT</th><th class="px-4 py-3 text-left">TINDAKAN</th><th class="px-4 py-3 text-left">VAKSIN</th></tr></thead>
-      <tbody id="table-kesehatan" class="text-gray-700"></tbody></table>
-    </div>
-  </div>
-
+<main class="flex-1 ml-64 p-8">
+  <div id="content"></div>
 </main>
 
-<!-- MODAL TAMBAH TERNAK -->
-<div id="modal-tambah" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
-  <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl p-8" onclick="event.stopPropagation()">
-    <div class="flex justify-between items-center mb-6">
-      <h3 class="text-xl font-extrabold text-gray-900">Tambah Data Ternak</h3>
-      <button onclick="document.getElementById('modal-tambah').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+<div id="modal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl p-8" onclick="event.stopPropagation()">
+    <h3 id="modal-title" class="text-xl font-bold mb-6">Form</h3>
+    <div id="modal-body" class="grid grid-cols-2 gap-4"></div>
+    <div class="flex gap-3 mt-6">
+      <button onclick="document.getElementById('modal').classList.add('hidden')" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-bold">Batal</button>
+      <button id="modal-save" class="flex-1 bg-green-700 text-white py-3 rounded-xl font-bold">Simpan</button>
     </div>
-    <div class="grid grid-cols-2 gap-4">
-      <div><label class="text-xs font-bold text-gray-500 uppercase mb-1 block">TAG *</label><input id="t-tag" class="w-full bg-gray-50 border border-gray-200 px-3 py-2.5 rounded-xl text-sm" placeholder="S-106"></div>
-      <div><label class="text-xs font-bold text-gray-500 uppercase mb-1 block">JENIS *</label><input id="t-jenis" class="w-full bg-gray-50 border border-gray-200 px-3 py-2.5 rounded-xl text-sm" placeholder="Sapi Limousin"></div>
-      <div><label class="text-xs font-bold text-gray-500 uppercase mb-1 block">RAS</label><input id="t-ras" class="w-full bg-gray-50 border border-gray-200 px-3 py-2.5 rounded-xl text-sm" placeholder="Limousin"></div>
-      <div><label class="text-xs font-bold text-gray-500 uppercase mb-1 block">BOBOT (kg) *</label><input id="t-bobot" type="number" class="w-full bg-gray-50 border border-gray-200 px-3 py-2.5 rounded-xl text-sm" placeholder="300"></div>
-      <div><label class="text-xs font-bold text-gray-500 uppercase mb-1 block">UMUR *</label><input id="t-umur" class="w-full bg-gray-50 border border-gray-200 px-3 py-2.5 rounded-xl text-sm" placeholder="2 Tahun"></div>
-      <div><label class="text-xs font-bold text-gray-500 uppercase mb-1 block">HARGA (Rp) *</label><input id="t-harga" type="number" class="w-full bg-gray-50 border border-gray-200 px-3 py-2.5 rounded-xl text-sm" placeholder="20000000"></div>
-      <div class="col-span-2"><label class="text-xs font-bold text-gray-500 uppercase mb-1 block">URL GAMBAR</label><input id="t-img" class="w-full bg-gray-50 border border-gray-200 px-3 py-2.5 rounded-xl text-sm" placeholder="https://..."></div>
-      <div class="col-span-2"><label class="text-xs font-bold text-gray-500 uppercase mb-1 block">DESKRIPSI</label><textarea id="t-desc" rows="2" class="w-full bg-gray-50 border border-gray-200 px-3 py-2.5 rounded-xl text-sm resize-none" placeholder="Deskripsi singkat hewan..."></textarea></div>
-      <div class="col-span-2 flex items-center gap-3"><input type="checkbox" id="t-sertif" class="w-4 h-4 accent-green-700"><label class="text-sm font-semibold text-gray-700" for="t-sertif">Memiliki Sertifikat Kesehatan</label></div>
-    </div>
-    <div id="tambah-error" class="hidden mt-3 text-red-600 text-sm bg-red-50 px-4 py-2.5 rounded-xl"></div>
-    <button onclick="submitTambah()" class="w-full mt-5 bg-green-700 hover:bg-green-600 text-white py-3.5 rounded-xl font-bold text-sm transition shadow-lg">Simpan Data Ternak</button>
   </div>
 </div>
 
 <script>
-  const token = localStorage.getItem('ab_token');
-  const H = {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'};
+  const H = {'Authorization': `Bearer ${localStorage.getItem('ab_token')}`, 'Content-Type': 'application/json'};
+  let currentBase64 = ''; // State untuk menyimpan hasil convert image file ke base64
 
-  // Clock
-  setInterval(() => {
-    const d = new Date();
-    document.getElementById('current-time').textContent = d.toLocaleString('id-ID', {dateStyle:'medium', timeStyle:'short'});
-  }, 1000);
-
-  function showSection(name) {
-    ['overview','ternak','pesanan','users','pakan','kesehatan'].forEach(s => document.getElementById('sec-'+s).classList.add('hidden'));
-    document.getElementById('sec-'+name).classList.remove('hidden');
-    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-    const titles = {overview:'Dashboard Overview', ternak:'Data Ternak', pesanan:'Manajemen Pesanan', users:'Daftar Pengguna', pakan:'Stok Pakan', kesehatan:'Riwayat Kesehatan'};
-    document.getElementById('page-title').textContent = titles[name];
-    if (name === 'ternak') loadTernak();
-    if (name === 'pesanan') loadPesanan();
-    if (name === 'users') loadUsers();
-    if (name === 'pakan') loadPakan();
-    if (name === 'kesehatan') loadKesehatan();
+  function nav(page) {
+    document.querySelectorAll('aside button').forEach(b => b.classList.remove('bg-green-800', 'font-bold'));
+    event.currentTarget.classList.add('bg-green-800', 'font-bold');
+    if(page==='overview') renderOverview();
+    if(page==='ternak') renderTernak();
+    if(page==='pesanan') renderPesanan();
+    if(page==='users') renderUsers();
+    if(page==='pakan') renderPakan();
+    if(page==='kesehatan') renderKesehatan();
   }
 
-  // Load Stats
-  fetch('/api/admin/stats', {headers:H}).then(r=>r.json()).then(d => {
-    const cards = [
-      {label:'Total Ternak', val: d.ternak, icon:'🐄', color:'green'},
-      {label:'Tersedia', val: d.tersedia, icon:'✅', color:'emerald'},
-      {label:'Pesanan Pending', val: d.pesanan_pending, icon:'⏳', color:'amber'},
-      {label:'Total Pelanggan', val: d.total_users, icon:'👥', color:'blue'},
-    ];
-    document.getElementById('stats-grid').innerHTML = cards.map(c => `
-      <div class="stat-card bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-        <div class="flex items-center justify-between mb-3">
-          <div class="text-2xl">${c.icon}</div>
-          <div class="text-xs font-bold text-gray-400 uppercase tracking-wider">${c.label}</div>
-        </div>
-        <div class="text-4xl font-extrabold text-gray-900">${val(c.val)}</div>
-      </div>
-    `).join('');
-    if (d.pesanan_pending > 0) { document.getElementById('badge-pesanan').textContent = d.pesanan_pending; document.getElementById('badge-pesanan').classList.remove('hidden'); }
-
-    // Overview mini ternak
-    fetch('/api/admin/ternak', {headers:H}).then(r=>r.json()).then(data => {
-      document.getElementById('overview-ternak').innerHTML = data.slice(0,5).map(t => `
-        <tr class="border-b border-gray-50 hover:bg-gray-50">
-          <td class="px-4 py-3 font-mono font-bold text-gray-600 text-xs">${t.tag}</td>
-          <td class="px-4 py-3 font-semibold">${t.jenis}</td>
-          <td class="px-4 py-3">${t.bobot} kg</td>
-          <td class="px-4 py-3 font-bold text-green-700">Rp ${(t.harga/1000000).toFixed(1)}jt</td>
-          <td class="px-4 py-3"><span class="${t.status==='Tersedia'?'bg-emerald-100 text-emerald-800':t.status==='Dipesan'?'bg-amber-100 text-amber-800':'bg-gray-100 text-gray-600'} px-2.5 py-1 rounded-full text-xs font-bold">${t.status}</span></td>
-        </tr>
-      `).join('');
+  // --- HELPER UNTUK MODAL DINAMIS ---
+  function openModal(title, fields, onSave) {
+    document.getElementById('modal-title').textContent = title;
+    const body = document.getElementById('modal-body');
+    body.innerHTML = ''; currentBase64 = '';
+    
+    fields.forEach(f => {
+      const col = f.col || 'col-span-2';
+      let inputHtml = '';
+      if(f.type === 'file') {
+         inputHtml = `<input type="file" id="${f.id}" accept="image/*" class="w-full bg-gray-50 border p-2 rounded-lg" onchange="convertBase64(this)">`;
+      } else if(f.type === 'select') {
+         inputHtml = `<select id="${f.id}" class="w-full bg-gray-50 border p-2 rounded-lg">${f.opts.map(o=>`<option value="${o}" ${o===f.val?'selected':''}>${o}</option>`).join('')}</select>`;
+      } else {
+         inputHtml = `<input type="${f.type||'text'}" id="${f.id}" value="${f.val||''}" class="w-full bg-gray-50 border p-2 rounded-lg">`;
+      }
+      body.innerHTML += `<div class="${col}"><label class="text-xs font-bold text-gray-500 mb-1 block">${f.label}</label>${inputHtml}</div>`;
     });
-  });
-
-  function val(v) { return v !== undefined ? v : '—'; }
-
-  function loadTernak() {
-    fetch('/api/admin/ternak', {headers:H}).then(r=>r.json()).then(data => {
-      document.getElementById('table-ternak').innerHTML = data.map(t => `
-        <tr class="border-b border-gray-50 hover:bg-gray-50">
-          <td class="px-4 py-3 font-mono font-bold text-gray-600 text-xs">${t.tag}</td>
-          <td class="px-4 py-3 flex items-center gap-3"><img src="${t.image_url||'https://via.placeholder.com/40'}" class="w-10 h-10 rounded-lg object-cover"> <span class="font-semibold">${t.jenis}</span></td>
-          <td class="px-4 py-3">${t.bobot} kg</td>
-          <td class="px-4 py-3 font-bold text-green-700">Rp ${t.harga.toLocaleString()}</td>
-          <td class="px-4 py-3"><span class="${t.status==='Tersedia'?'bg-emerald-100 text-emerald-800':t.status==='Dipesan'?'bg-amber-100 text-amber-800':'bg-gray-100 text-gray-600'} px-2.5 py-1 rounded-full text-xs font-bold">${t.status}</span></td>
-          <td class="px-4 py-3"><button onclick="hapusTernak(${t.id})" class="text-red-500 hover:text-red-700 text-xs font-bold border border-red-200 hover:border-red-400 px-3 py-1 rounded-lg transition">Hapus</button></td>
-        </tr>
-      `).join('');
-    });
+    
+    document.getElementById('modal-save').onclick = () => { onSave(); document.getElementById('modal').classList.add('hidden'); };
+    document.getElementById('modal').classList.remove('hidden');
   }
 
-  function loadPesanan() {
-    fetch('/api/admin/pesanan', {headers:H}).then(r=>r.json()).then(data => {
-      document.getElementById('table-pesanan').innerHTML = data.length ? data.map(p => `
-        <tr class="border-b border-gray-50 hover:bg-gray-50">
-          <td class="px-4 py-3 font-mono font-bold text-green-700 text-xs">${p.order_id}</td>
-          <td class="px-4 py-3"><div class="font-semibold text-gray-800">${p.buyer_name}</div><div class="text-xs text-gray-400">${p.buyer_email}</div></td>
-          <td class="px-4 py-3 font-semibold">${p.jenis} (${p.tag})</td>
-          <td class="px-4 py-3 font-bold">Rp ${p.total_harga.toLocaleString()}</td>
-          <td class="px-4 py-3"><span class="${p.status==='Lunas'?'bg-green-100 text-green-800':p.status==='Menunggu Pembayaran'?'bg-amber-100 text-amber-800':'bg-gray-100 text-gray-600'} px-2.5 py-1 rounded-full text-xs font-bold">${p.status}</span></td>
-          <td class="px-4 py-3">
-            ${p.status==='Menunggu Pembayaran'?`<button onclick="updatePesanan(${p.id},'Lunas')" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1 rounded-lg transition">✓ Konfirmasi Lunas</button>`:''}
-          </td>
-        </tr>
-      `).join('') : '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">Belum ada pesanan</td></tr>';
-    });
+  function convertBase64(input) {
+    const file = input.files[0];
+    if(file) { const r = new FileReader(); r.onload = (e) => currentBase64 = e.target.result; r.readAsDataURL(file); }
   }
 
-  function loadUsers() {
-    fetch('/api/admin/users', {headers:H}).then(r=>r.json()).then(data => {
-      document.getElementById('table-users').innerHTML = data.map(u => `
-        <tr class="border-b border-gray-50 hover:bg-gray-50">
-          <td class="px-4 py-3 font-semibold">${u.name}</td>
-          <td class="px-4 py-3 text-gray-600">${u.email}</td>
-          <td class="px-4 py-3 text-gray-600">${u.phone||'-'}</td>
-          <td class="px-4 py-3"><span class="${u.role==='admin'?'bg-red-100 text-red-700':'bg-blue-100 text-blue-700'} px-2.5 py-1 rounded-full text-xs font-bold">${u.role}</span></td>
-          <td class="px-4 py-3 text-gray-400 text-xs">${new Date(u.created_at).toLocaleDateString('id-ID')}</td>
-        </tr>
-      `).join('');
+  // --- RENDER PAGES ---
+  async function renderOverview() {
+    const d = await (await fetch('/api/admin/stats', {headers:H})).json();
+    document.getElementById('content').innerHTML = `<h2 class="text-2xl font-bold mb-6">Overview</h2>
+      <div class="grid grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100"><div class="text-gray-500 text-sm font-bold">Total Ternak</div><div class="text-4xl font-extrabold">${d.ternak}</div></div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100"><div class="text-gray-500 text-sm font-bold">Pesanan Pending</div><div class="text-4xl font-extrabold text-amber-600">${d.pesanan_pending}</div></div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100"><div class="text-gray-500 text-sm font-bold">Total Pelanggan</div><div class="text-4xl font-extrabold text-blue-600">${d.total_users}</div></div>
+      </div>`;
+  }
+
+  async function renderTernak() {
+    const data = await (await fetch('/api/admin/ternak', {headers:H})).json();
+    let trs = data.map(t => `<tr class="border-b"><td class="p-4 font-bold text-sm">${t.tag}</td><td class="p-4 font-semibold">${t.jenis}</td><td class="p-4">${t.bobot}kg</td><td class="p-4">Rp ${t.harga.toLocaleString()}</td><td class="p-4 text-xs font-bold">${t.status}</td>
+      <td class="p-4"><button onclick='editTernak(${JSON.stringify(t)})' class="text-blue-600 font-bold mr-3">Edit</button><button onclick="hapus('/api/admin/ternak/${t.id}', renderTernak)" class="text-red-600 font-bold">Hapus</button></td></tr>`).join('');
+    
+    document.getElementById('content').innerHTML = `<div class="flex justify-between items-center mb-6"><h2 class="text-2xl font-bold">Data Ternak</h2><button onclick="tambahTernak()" class="bg-green-700 text-white px-4 py-2 rounded-lg font-bold">+ Tambah</button></div>
+      <div class="bg-white rounded-2xl border overflow-hidden"><table class="w-full text-left"><thead class="bg-gray-50"><tr><th class="p-4">TAG</th><th class="p-4">JENIS</th><th class="p-4">BOBOT</th><th class="p-4">HARGA</th><th class="p-4">STATUS</th><th class="p-4">AKSI</th></tr></thead><tbody>${trs}</tbody></table></div>`;
+  }
+
+  async function renderPesanan() {
+    const data = await (await fetch('/api/admin/pesanan', {headers:H})).json();
+    let trs = data.map(p => `<tr class="border-b"><td class="p-4 font-bold text-green-700">${p.order_id}</td><td class="p-4 text-sm"><div class="font-bold">${p.buyer_name}</div></td><td class="p-4 text-sm font-semibold">${p.jumlah}x ${p.jenis}<div class="text-xs text-gray-400">Tag: ${p.detail_hewan}</div></td><td class="p-4 font-bold">Rp ${p.total_harga.toLocaleString()}</td><td class="p-4 text-xs font-bold">${p.status}</td><td class="p-4">${p.status==='Menunggu Pembayaran'?`<button onclick="updatePesanan(${p.id}, 'Lunas')" class="text-white bg-green-600 px-3 py-1 rounded-lg text-xs font-bold">Konfirmasi Lunas</button>`:'-'}</td></tr>`).join('');
+    document.getElementById('content').innerHTML = `<h2 class="text-2xl font-bold mb-6">Manajemen Pesanan</h2><div class="bg-white rounded-2xl border overflow-hidden"><table class="w-full text-left"><thead class="bg-gray-50"><tr><th class="p-4">ORDER ID</th><th class="p-4">PEMBELI</th><th class="p-4">PESANAN (TAG)</th><th class="p-4">TOTAL</th><th class="p-4">STATUS</th><th class="p-4">AKSI</th></tr></thead><tbody>${trs}</tbody></table></div>`;
+  }
+
+  async function renderPakan() {
+    const data = await (await fetch('/api/admin/pakan', {headers:H})).json();
+    let trs = data.map(p => `<tr class="border-b"><td class="p-4 font-bold">${p.jenis_pakan}</td><td class="p-4">${p.stok_kg} kg</td><td class="p-4 text-sm font-bold text-amber-600">${p.estimasi_hari} Hari</td><td class="p-4"><button onclick='editPakan(${JSON.stringify(p)})' class="text-blue-600 font-bold mr-3">Edit</button><button onclick="hapus('/api/admin/pakan/${p.id}', renderPakan)" class="text-red-600 font-bold">Hapus</button></td></tr>`).join('');
+    document.getElementById('content').innerHTML = `<div class="flex justify-between items-center mb-6"><h2 class="text-2xl font-bold">Stok Pakan</h2><button onclick="tambahPakan()" class="bg-green-700 text-white px-4 py-2 rounded-lg font-bold">+ Tambah Pakan</button></div><div class="bg-white rounded-2xl border overflow-hidden"><table class="w-full text-left"><thead class="bg-gray-50"><tr><th class="p-4">JENIS PAKAN</th><th class="p-4">STOK (KG)</th><th class="p-4">ESTIMASI HABIS</th><th class="p-4">AKSI</th></tr></thead><tbody>${trs}</tbody></table></div>`;
+  }
+
+  async function renderKesehatan() {
+    const data = await (await fetch('/api/admin/kesehatan', {headers:H})).json();
+    let trs = data.map(k => `<tr class="border-b"><td class="p-4 font-bold">${k.ternak_tag}</td><td class="p-4">${k.tanggal}</td><td class="p-4 text-sm">${k.riwayat_sakit}</td><td class="p-4 text-sm font-semibold">${k.tindakan}</td><td class="p-4"><button onclick='editKes(${JSON.stringify(k)})' class="text-blue-600 font-bold mr-3">Edit</button><button onclick="hapus('/api/admin/kesehatan/${k.id}', renderKesehatan)" class="text-red-600 font-bold">Hapus</button></td></tr>`).join('');
+    document.getElementById('content').innerHTML = `<div class="flex justify-between items-center mb-6"><h2 class="text-2xl font-bold">Data Kesehatan</h2><button onclick="tambahKes()" class="bg-green-700 text-white px-4 py-2 rounded-lg font-bold">+ Tambah Data</button></div><div class="bg-white rounded-2xl border overflow-hidden"><table class="w-full text-left"><thead class="bg-gray-50"><tr><th class="p-4">TAG</th><th class="p-4">TANGGAL</th><th class="p-4">SAKIT</th><th class="p-4">TINDAKAN</th><th class="p-4">AKSI</th></tr></thead><tbody>${trs}</tbody></table></div>`;
+  }
+  
+  async function renderUsers() {
+    const data = await (await fetch('/api/admin/users', {headers:H})).json();
+    let trs = data.map(u => `<tr class="border-b"><td class="p-4 font-bold">${u.name}</td><td class="p-4">${u.email}</td><td class="p-4 font-bold text-sm">${u.role}</td><td class="p-4"><button onclick='editUser(${JSON.stringify(u)})' class="text-blue-600 font-bold mr-3">Edit</button><button onclick="hapus('/api/admin/users/${u.id}', renderUsers)" class="text-red-600 font-bold">Hapus</button></td></tr>`).join('');
+    document.getElementById('content').innerHTML = `<h2 class="text-2xl font-bold mb-6">Pengguna</h2><div class="bg-white rounded-2xl border overflow-hidden"><table class="w-full text-left"><thead class="bg-gray-50"><tr><th class="p-4">NAMA</th><th class="p-4">EMAIL</th><th class="p-4">ROLE</th><th class="p-4">AKSI</th></tr></thead><tbody>${trs}</tbody></table></div>`;
+  }
+
+  // --- CRUD ACTIONS ---
+  async function hapus(url, reloadFn) { if(confirm('Yakin hapus data ini?')) { await fetch(url, {method:'DELETE', headers:H}); reloadFn(); } }
+  
+  async function updatePesanan(id, status) { await fetch(`/api/admin/pesanan/${id}/status`, {method:'PUT', headers:H, body:JSON.stringify({status})}); renderPesanan(); }
+
+  function tambahTernak() {
+    openModal('Tambah Ternak', [
+      {id:'t_tag', label:'Tag Unik', col:'col-span-1'}, {id:'t_jenis', label:'Jenis', col:'col-span-1'},
+      {id:'t_bobot', label:'Bobot (kg)', type:'number', col:'col-span-1'}, {id:'t_umur', label:'Umur', col:'col-span-1'},
+      {id:'t_harga', label:'Harga', type:'number'}, {id:'t_img', label:'Upload Foto', type:'file'}
+    ], async () => {
+      const payload = { tag: document.getElementById('t_tag').value, jenis: document.getElementById('t_jenis').value, bobot: parseInt(document.getElementById('t_bobot').value), umur: document.getElementById('t_umur').value, harga: parseInt(document.getElementById('t_harga').value), image_url: currentBase64 };
+      await fetch('/api/admin/ternak', {method:'POST', headers:H, body:JSON.stringify(payload)}); renderTernak();
     });
   }
 
-  function loadPakan() {
-    fetch('/api/admin/pakan', {headers:H}).then(r=>r.json()).then(data => {
-      document.getElementById('table-pakan').innerHTML = data.map(p => {
-        const low = p.estimasi_hari <= 5;
-        return `<tr class="border-b border-gray-50 hover:bg-gray-50">
-          <td class="px-4 py-3 font-semibold">${p.jenis_pakan}</td>
-          <td class="px-4 py-3 font-bold">${p.stok_kg} kg</td>
-          <td class="px-4 py-3 font-bold ${low?'text-red-600':'text-amber-600'}">${p.estimasi_hari} Hari</td>
-          <td class="px-4 py-3"><span class="${low?'bg-red-100 text-red-700':'bg-green-100 text-green-700'} px-2.5 py-1 rounded-full text-xs font-bold">${low?'⚠ Segera Restock':'Aman'}</span></td>
-        </tr>`;
-      }).join('');
+  function editTernak(t) {
+    openModal('Edit Ternak', [
+      {id:'t_tag', label:'Tag Unik', val:t.tag, col:'col-span-1'}, {id:'t_jenis', label:'Jenis', val:t.jenis, col:'col-span-1'},
+      {id:'t_bobot', label:'Bobot (kg)', type:'number', val:t.bobot, col:'col-span-1'}, {id:'t_umur', label:'Umur', val:t.umur, col:'col-span-1'},
+      {id:'t_harga', label:'Harga', type:'number', val:t.harga, col:'col-span-1'}, {id:'t_status', label:'Status', type:'select', opts:['Tersedia','Dipesan','Terjual'], val:t.status, col:'col-span-1'},
+      {id:'t_img', label:'Upload Foto Baru (opsional)', type:'file'}
+    ], async () => {
+      const payload = { tag: document.getElementById('t_tag').value, jenis: document.getElementById('t_jenis').value, bobot: parseInt(document.getElementById('t_bobot').value), umur: document.getElementById('t_umur').value, harga: parseInt(document.getElementById('t_harga').value), status: document.getElementById('t_status').value, image_url: currentBase64 || t.image_url };
+      await fetch('/api/admin/ternak/'+t.id, {method:'PUT', headers:H, body:JSON.stringify(payload)}); renderTernak();
     });
   }
 
-  function loadKesehatan() {
-    fetch('/api/admin/kesehatan', {headers:H}).then(r=>r.json()).then(data => {
-      document.getElementById('table-kesehatan').innerHTML = data.map(k => `
-        <tr class="border-b border-gray-50 hover:bg-gray-50">
-          <td class="px-4 py-3 font-mono font-bold text-green-700 text-xs">${k.ternak_tag}</td>
-          <td class="px-4 py-3 text-gray-600">${k.tanggal}</td>
-          <td class="px-4 py-3">${k.riwayat_sakit||'-'}</td>
-          <td class="px-4 py-3 font-semibold">${k.tindakan||'-'}</td>
-          <td class="px-4 py-3"><span class="bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full text-xs font-bold">${k.jenis_vaksin||'-'}</span></td>
-        </tr>
-      `).join('');
+  function editPakan(p) {
+    openModal('Edit Pakan', [ {id:'p_jenis', label:'Jenis Pakan', val:p.jenis_pakan}, {id:'p_stok', label:'Stok (kg)', type:'number', val:p.stok_kg}, {id:'p_hari', label:'Estimasi (Hari)', type:'number', val:p.estimasi_hari} ], async () => {
+      await fetch('/api/admin/pakan/'+p.id, {method:'PUT', headers:H, body:JSON.stringify({jenis_pakan: document.getElementById('p_jenis').value, stok_kg: document.getElementById('p_stok').value, estimasi_hari: document.getElementById('p_hari').value})}); renderPakan();
+    });
+  }
+  function tambahPakan() {
+    openModal('Tambah Pakan', [ {id:'p_jenis', label:'Jenis Pakan'}, {id:'p_stok', label:'Stok (kg)', type:'number'}, {id:'p_hari', label:'Estimasi (Hari)', type:'number'} ], async () => {
+      await fetch('/api/admin/pakan', {method:'POST', headers:H, body:JSON.stringify({jenis_pakan: document.getElementById('p_jenis').value, stok_kg: document.getElementById('p_stok').value, estimasi_hari: document.getElementById('p_hari').value})}); renderPakan();
     });
   }
 
-  async function hapusTernak(id) {
-    if (!confirm('Yakin hapus data ternak ini?')) return;
-    await fetch('/api/admin/ternak/'+id, {method:'DELETE', headers:H});
-    loadTernak();
+  function editKes(k) {
+    openModal('Edit Kesehatan', [ {id:'k_tag', label:'Tag Ternak', val:k.ternak_tag}, {id:'k_tgl', type:'date', label:'Tanggal', val:k.tanggal}, {id:'k_sakit', label:'Sakit', val:k.riwayat_sakit}, {id:'k_tindak', label:'Tindakan', val:k.tindakan}, {id:'k_vaksin', label:'Vaksin', val:k.jenis_vaksin} ], async () => {
+      await fetch('/api/admin/kesehatan/'+k.id, {method:'PUT', headers:H, body:JSON.stringify({ternak_tag: document.getElementById('k_tag').value, tanggal: document.getElementById('k_tgl').value, riwayat_sakit: document.getElementById('k_sakit').value, tindakan: document.getElementById('k_tindak').value, jenis_vaksin: document.getElementById('k_vaksin').value})}); renderKesehatan();
+    });
+  }
+  function tambahKes() {
+    openModal('Tambah Kesehatan', [ {id:'k_tag', label:'Tag Ternak'}, {id:'k_tgl', type:'date', label:'Tanggal'}, {id:'k_sakit', label:'Sakit'}, {id:'k_tindak', label:'Tindakan'}, {id:'k_vaksin', label:'Vaksin'} ], async () => {
+      await fetch('/api/admin/kesehatan', {method:'POST', headers:H, body:JSON.stringify({ternak_tag: document.getElementById('k_tag').value, tanggal: document.getElementById('k_tgl').value, riwayat_sakit: document.getElementById('k_sakit').value, tindakan: document.getElementById('k_tindak').value, jenis_vaksin: document.getElementById('k_vaksin').value})}); renderKesehatan();
+    });
   }
 
-  async function updatePesanan(id, status) {
-    await fetch('/api/admin/pesanan/'+id+'/status', {method:'PUT', headers:H, body:JSON.stringify({status})});
-    loadPesanan();
-    fetch('/api/admin/stats', {headers:H}).then(r=>r.json()).then(d => { /* refresh badge */ });
+  function editUser(u) {
+    openModal('Edit User', [ {id:'u_name', label:'Nama', val:u.name}, {id:'u_email', label:'Email', val:u.email}, {id:'u_phone', label:'Phone', val:u.phone}, {id:'u_role', label:'Role', type:'select', opts:['pembeli','admin'], val:u.role} ], async () => {
+      await fetch('/api/admin/users/'+u.id, {method:'PUT', headers:H, body:JSON.stringify({name: document.getElementById('u_name').value, email: document.getElementById('u_email').value, phone: document.getElementById('u_phone').value, role: document.getElementById('u_role').value})}); renderUsers();
+    });
   }
 
-  function openTambahModal() { document.getElementById('modal-tambah').classList.remove('hidden'); }
-
-  async function submitTambah() {
-    const err = document.getElementById('tambah-error');
-    const tag = document.getElementById('t-tag').value.trim();
-    const jenis = document.getElementById('t-jenis').value.trim();
-    const bobot = document.getElementById('t-bobot').value;
-    const umur = document.getElementById('t-umur').value.trim();
-    const harga = document.getElementById('t-harga').value;
-    if (!tag||!jenis||!bobot||!umur||!harga) { err.textContent='Semua kolom wajib (*) harus diisi'; err.classList.remove('hidden'); return; }
-    err.classList.add('hidden');
-    const res = await fetch('/api/admin/ternak', {method:'POST', headers:H, body:JSON.stringify({
-      tag, jenis, ras: document.getElementById('t-ras').value,
-      bobot: parseInt(bobot), umur, harga: parseInt(harga),
-      image_url: document.getElementById('t-img').value,
-      deskripsi: document.getElementById('t-desc').value,
-      sertifikat: document.getElementById('t-sertif').checked ? 1 : 0
-    })});
-    if (res.ok) { document.getElementById('modal-tambah').classList.add('hidden'); loadTernak(); showSection({currentTarget:document.querySelectorAll('.sidebar-link')[1]}, 'ternak'); alert('✅ Ternak berhasil ditambahkan!'); }
-    else { const d = await res.json(); err.textContent = d.error||'Gagal menyimpan'; err.classList.remove('hidden'); }
-  }
+  nav('overview'); // INIT
 </script>
 </body>
 </html>
