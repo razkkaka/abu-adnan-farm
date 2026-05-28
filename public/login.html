@@ -7,89 +7,221 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    :root { --green: #15803d; }
-    body { font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; background-color: #f0fdf4; overflow-y: auto; overflow-x: hidden;}
-    .hero-bg { background: linear-gradient(135deg, rgba(5,46,22,0.92), rgba(20,83,45,0.88)), url('https://images.unsplash.com/photo-1500595046743-cd271d694d30?q=80&w=2000') center/cover; }
-    .glass { background: rgba(255,255,255,0.97); backdrop-filter: blur(20px); }
+    :root { --green: #15803d; --dark: #052e16; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; min-height: 100vh; }
+    .hero-bg {
+      background: linear-gradient(135deg, rgba(5,46,22,0.93) 0%, rgba(20,83,45,0.88) 60%, rgba(21,128,61,0.80) 100%),
+        url('https://images.unsplash.com/photo-1500595046743-cd271d694d30?q=80&w=2000') center/cover no-repeat;
+    }
+    input:focus { border-color: var(--green) !important; box-shadow: 0 0 0 3px rgba(21,128,61,0.12); outline: none; }
+    .btn-primary { background: var(--green); transition: all 0.2s; }
+    .btn-primary:hover { background: #166534; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(21,128,61,0.35); }
     .tab-active { background: var(--green); color: white; }
     .tab-inactive { background: transparent; color: #6b7280; }
-    input:focus { border-color: var(--green) !important; outline: none; box-shadow: 0 0 0 3px rgba(21,128,61,0.12); }
-    .btn-primary { background: var(--green); transition: all 0.2s; }
+    .float-cow { animation: floatCow 3s ease-in-out infinite; display: inline-block; }
+    @keyframes floatCow { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    .fade-in { animation: fadeUp 0.5s ease forwards; opacity:0; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
   </style>
 </head>
-<body class="min-h-screen flex">
-  <div class="hero-bg hidden md:flex flex-col justify-center p-16 w-1/2 sticky top-0 h-screen">
-    <div class="flex items-center gap-3 mb-8"><div class="bg-green-500 text-white w-12 h-12 rounded-xl flex items-center justify-center shadow text-2xl">🐄</div><span class="text-white font-bold text-xl">Abu Farm</span></div>
-    <h1 class="text-5xl font-bold text-white mb-4 leading-tight" style="font-family:'Playfair Display',serif;">Hewan Qurban<br>Terpercaya</h1>
-    <p class="text-green-100 text-lg leading-relaxed">Platform digital untuk melacak dan memesan hewan qurban langsung dari kandang Bogor.</p>
+<body class="min-h-screen flex flex-col md:flex-row">
+
+  <!-- LEFT PANEL (hidden on mobile) -->
+  <div class="hero-bg hidden md:flex flex-col justify-between p-16 w-1/2 fixed top-0 left-0 h-full overflow-hidden">
+    <div class="absolute top-0 right-0 w-96 h-96 bg-green-500/10 rounded-full -translate-y-32 translate-x-32"></div>
+    <div class="absolute bottom-0 left-0 w-64 h-64 bg-green-400/10 rounded-full translate-y-16 -translate-x-16"></div>
+    <div class="relative">
+      <div class="flex items-center gap-3 mb-20">
+        <div class="bg-green-500 text-white text-2xl w-12 h-12 rounded-xl flex items-center justify-center shadow-lg">🐄</div>
+        <span class="text-white font-bold text-xl">Abu Farm</span>
+      </div>
+      <div class="float-cow text-7xl mb-8">🐄</div>
+      <h1 class="text-5xl font-bold text-white mb-6 leading-tight" style="font-family:'Playfair Display',serif;">
+        Hewan Qurban<br>Terpercaya &<br><span class="text-green-400">Berkualitas</span>
+      </h1>
+      <p class="text-green-100 text-lg max-w-sm leading-relaxed">
+        Platform digital untuk memilih dan memesan hewan qurban langsung dari kandang kami di Bogor.
+      </p>
+    </div>
+    <div class="relative bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 max-w-sm">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 bg-green-400 rounded-full flex items-center justify-center font-bold text-green-900">A</div>
+        <div><div class="text-white font-semibold text-sm">Ahmad Fauzi</div><div class="text-green-300 text-xs">Pelanggan Setia 2023</div></div>
+        <div class="ml-auto text-yellow-400 text-sm">★★★★★</div>
+      </div>
+      <p class="text-green-100 text-sm leading-relaxed">"Sapi Limousin-nya sehat dan bobotnya sesuai. Proses order mudah banget!"</p>
+    </div>
   </div>
 
-  <div class="glass flex flex-col items-center py-12 px-6 w-full md:w-1/2 min-h-screen relative">
-    <div class="w-full max-w-md my-auto">
-      <div class="md:hidden text-center mb-8"><div class="text-4xl mb-2">🐄</div><div class="font-bold text-green-900 text-xl">Abu Farm</div></div>
-      <h2 class="text-3xl font-bold text-gray-900 mb-2" style="font-family:'Playfair Display',serif;">Selamat Datang</h2>
-      <p class="text-gray-500 mb-8 text-sm">Masuk atau buat akun baru untuk memesan</p>
+  <!-- RIGHT PANEL - scrollable -->
+  <div class="md:ml-[50%] w-full md:w-1/2 min-h-screen bg-white flex items-start justify-center py-10 px-6">
+    <div class="w-full max-w-md fade-in">
 
-      <div class="flex bg-gray-100 rounded-xl p-1 mb-8">
-        <button id="tab-login" onclick="switchTab('login')" class="flex-1 py-2.5 rounded-lg text-sm font-semibold tab-active">Masuk</button>
-        <button id="tab-register" onclick="switchTab('register')" class="flex-1 py-2.5 rounded-lg text-sm font-semibold tab-inactive">Daftar Akun</button>
+      <!-- Logo mobile only -->
+      <div class="md:hidden text-center mb-8">
+        <div class="text-4xl mb-2">🐄</div>
+        <div class="font-bold text-green-900 text-xl">Abu Farm</div>
       </div>
 
-      <!-- FORM LOGIN -->
+      <h2 class="text-3xl font-bold text-gray-900 mb-2" style="font-family:'Playfair Display',serif;">Selamat Datang</h2>
+      <p class="text-gray-500 mb-8 text-sm">Masuk atau buat akun baru untuk memesan hewan qurban</p>
+
+      <!-- Tab -->
+      <div class="flex bg-gray-100 rounded-xl p-1 mb-8">
+        <button id="tab-login" onclick="switchTab('login')" class="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all tab-active">Masuk</button>
+        <button id="tab-register" onclick="switchTab('register')" class="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all tab-inactive">Daftar Akun</button>
+      </div>
+
+      <!-- LOGIN -->
       <div id="form-login">
         <div class="space-y-4">
-          <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Email</label><input type="email" id="login-email" class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-sm font-medium"></div>
-          <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Password</label><input type="password" id="login-pass" class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-sm font-medium"></div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Email</label>
+            <input type="email" id="login-email" placeholder="contoh@email.com"
+              class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-sm font-medium text-gray-800">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Password</label>
+            <div class="relative">
+              <input type="password" id="login-pass" placeholder="••••••••"
+                class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-sm font-medium text-gray-800 pr-12">
+              <button type="button" onclick="togglePass('login-pass', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg">👁</button>
+            </div>
+          </div>
         </div>
         <div id="login-error" class="hidden mt-3 bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl border border-red-100"></div>
         <button onclick="doLogin()" id="btn-login" class="btn-primary w-full mt-6 py-4 rounded-xl text-white font-bold text-sm shadow-lg">Masuk Sekarang →</button>
+        <div class="mt-6 bg-green-50 border border-green-100 rounded-xl p-4 text-xs text-green-700 cursor-pointer hover:bg-green-100 transition" onclick="document.getElementById('login-email').value='admin@livestock.com';document.getElementById('login-pass').value='admin123'">
+          <div class="font-bold mb-1">💡 Demo Akun Admin (klik untuk isi otomatis):</div>
+          <div>📧 admin@livestock.com &nbsp; 🔑 admin123</div>
+        </div>
+        <p class="text-center text-sm text-gray-500 mt-6">Belum punya akun? <button onclick="switchTab('register')" class="text-green-700 font-bold hover:underline">Daftar di sini</button></p>
       </div>
 
-      <!-- FORM REGISTER -->
+      <!-- REGISTER -->
       <div id="form-register" class="hidden">
         <div class="space-y-4">
-          <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Nama Lengkap</label><input type="text" id="reg-name" class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-sm"></div>
-          <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Email</label><input type="email" id="reg-email" class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-sm"></div>
-          <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Password</label><input type="password" id="reg-pass" class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-sm"></div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Nama Lengkap *</label>
+            <input type="text" id="reg-name" placeholder="Nama Anda"
+              class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-sm font-medium text-gray-800">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Email *</label>
+            <input type="email" id="reg-email" placeholder="contoh@email.com"
+              class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-sm font-medium text-gray-800">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Nomor HP (WhatsApp)</label>
+            <input type="tel" id="reg-phone" placeholder="08xxxxxxxxxx"
+              class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-sm font-medium text-gray-800">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Password * <span class="text-gray-400 font-normal">(min. 6 karakter)</span></label>
+            <div class="relative">
+              <input type="password" id="reg-pass" placeholder="••••••••"
+                class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-sm font-medium text-gray-800 pr-12"
+                oninput="checkStrength(this.value)">
+              <button type="button" onclick="togglePass('reg-pass', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg">👁</button>
+            </div>
+            <div class="mt-2 flex gap-1">
+              <div class="h-1 flex-1 rounded bg-gray-200 transition-colors" id="s1"></div>
+              <div class="h-1 flex-1 rounded bg-gray-200 transition-colors" id="s2"></div>
+              <div class="h-1 flex-1 rounded bg-gray-200 transition-colors" id="s3"></div>
+              <div class="h-1 flex-1 rounded bg-gray-200 transition-colors" id="s4"></div>
+            </div>
+            <div class="text-xs text-gray-400 mt-1" id="strength-label"></div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Konfirmasi Password *</label>
+            <input type="password" id="reg-pass2" placeholder="Ulangi password"
+              class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-sm font-medium text-gray-800">
+          </div>
         </div>
-        <div id="reg-error" class="hidden mt-3 bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl"></div>
+        <div id="reg-error" class="hidden mt-3 bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl border border-red-100"></div>
+        <div id="reg-success" class="hidden mt-3 bg-green-50 text-green-700 text-sm px-4 py-3 rounded-xl border border-green-100"></div>
         <button onclick="doRegister()" id="btn-register" class="btn-primary w-full mt-6 py-4 rounded-xl text-white font-bold text-sm shadow-lg">Buat Akun Gratis →</button>
+        <p class="text-center text-sm text-gray-500 mt-6">Sudah punya akun? <button onclick="switchTab('login')" class="text-green-700 font-bold hover:underline">Masuk di sini</button></p>
       </div>
-      
-      <!-- TOMBOL KEMBALI JELAS -->
-      <div class="text-center mt-10">
-        <a href="/" class="text-sm font-bold text-green-700 hover:text-green-800 hover:underline">← Kembali ke Beranda</a>
-      </div>
+
+      <p class="text-center text-xs text-gray-400 mt-10 pb-6">
+        © 2024 Abu Farm · <a href="/" class="text-green-600 hover:underline">Kembali ke Beranda</a>
+      </p>
     </div>
   </div>
 
 <script>
-  function switchTab(t) {
-    document.getElementById('form-login').classList.toggle('hidden', t!=='login');
-    document.getElementById('form-register').classList.toggle('hidden', t==='login');
-    document.getElementById('tab-login').className = `flex-1 py-2.5 rounded-lg text-sm font-semibold ${t==='login'?'tab-active':'tab-inactive'}`;
-    document.getElementById('tab-register').className = `flex-1 py-2.5 rounded-lg text-sm font-semibold ${t!=='login'?'tab-active':'tab-inactive'}`;
+  function switchTab(tab) {
+    const isLogin = tab === 'login';
+    document.getElementById('form-login').classList.toggle('hidden', !isLogin);
+    document.getElementById('form-register').classList.toggle('hidden', isLogin);
+    document.getElementById('tab-login').className = `flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${isLogin ? 'tab-active' : 'tab-inactive'}`;
+    document.getElementById('tab-register').className = `flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${!isLogin ? 'tab-active' : 'tab-inactive'}`;
+    // Scroll to top of form
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+
+  function togglePass(id, btn) {
+    const inp = document.getElementById(id);
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+  }
+
+  function checkStrength(v) {
+    let score = 0;
+    if (v.length >= 6) score++; if (v.length >= 10) score++;
+    if (/[A-Z]/.test(v) || /[0-9]/.test(v)) score++; if (/[^A-Za-z0-9]/.test(v)) score++;
+    const colors = ['bg-red-400','bg-orange-400','bg-yellow-400','bg-green-500'];
+    const labels = ['Sangat Lemah','Lemah','Cukup','Kuat'];
+    [1,2,3,4].forEach(i => { document.getElementById('s'+i).className = `h-1 flex-1 rounded transition-colors ${i<=score ? colors[score-1] : 'bg-gray-200'}`; });
+    document.getElementById('strength-label').textContent = score > 0 ? labels[score-1] : '';
   }
 
   async function doLogin() {
-    const btn = document.getElementById('btn-login'); btn.textContent = 'Memproses...';
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-pass').value;
+    const errEl = document.getElementById('login-error');
+    const btn = document.getElementById('btn-login');
+    if (!email || !password) { showErr(errEl, 'Email dan password wajib diisi'); return; }
+    btn.textContent = 'Memproses...'; btn.disabled = true;
     try {
-      const res = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email: document.getElementById('login-email').value, password: document.getElementById('login-pass').value}) });
+      const res = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
       const d = await res.json();
-      if(res.ok) { localStorage.setItem('ab_token', d.token); localStorage.setItem('ab_user', JSON.stringify(d.user)); window.location.href = d.user.role === 'admin' ? '/admin' : '/dashboard'; }
-      else { document.getElementById('login-error').textContent = d.error; document.getElementById('login-error').classList.remove('hidden'); btn.textContent = 'Masuk Sekarang →'; }
-    } catch(e) { btn.textContent = 'Masuk Sekarang →'; }
+      if (res.ok) {
+        localStorage.setItem('ab_token', d.token);
+        localStorage.setItem('ab_user', JSON.stringify(d.user));
+        btn.textContent = '✓ Berhasil!';
+        window.location.href = d.user.role === 'admin' ? '/admin' : '/dashboard';
+      } else { showErr(errEl, d.error || 'Login gagal'); btn.textContent = 'Masuk Sekarang →'; btn.disabled = false; }
+    } catch { showErr(errEl, 'Koneksi bermasalah'); btn.textContent = 'Masuk Sekarang →'; btn.disabled = false; }
   }
 
   async function doRegister() {
-    const btn = document.getElementById('btn-register'); btn.textContent = 'Memproses...';
+    const name = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-pass').value;
+    const pass2 = document.getElementById('reg-pass2').value;
+    const phone = document.getElementById('reg-phone').value.trim();
+    const errEl = document.getElementById('reg-error');
+    const okEl = document.getElementById('reg-success');
+    const btn = document.getElementById('btn-register');
+    errEl.classList.add('hidden'); okEl.classList.add('hidden');
+    if (!name || !email || !password) { showErr(errEl, 'Nama, email, dan password wajib diisi'); return; }
+    if (password.length < 6) { showErr(errEl, 'Password minimal 6 karakter'); return; }
+    if (password !== pass2) { showErr(errEl, 'Konfirmasi password tidak cocok'); return; }
+    btn.textContent = 'Mendaftarkan...'; btn.disabled = true;
     try {
-      const res = await fetch('/api/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name: document.getElementById('reg-name').value, email: document.getElementById('reg-email').value, password: document.getElementById('reg-pass').value}) });
-      if(res.ok) { alert('Berhasil daftar! Silakan masuk.'); switchTab('login'); }
-      else { const d = await res.json(); document.getElementById('reg-error').textContent = d.error; document.getElementById('reg-error').classList.remove('hidden'); }
-      btn.textContent = 'Buat Akun Gratis →';
-    } catch(e) { btn.textContent = 'Buat Akun Gratis →'; }
+      const res = await fetch('/api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, password, phone }) });
+      const d = await res.json();
+      if (res.ok) {
+        okEl.textContent = '✅ Akun berhasil dibuat! Silakan masuk sekarang.'; okEl.classList.remove('hidden');
+        btn.textContent = 'Buat Akun Gratis →'; btn.disabled = false;
+        setTimeout(() => switchTab('login'), 2000);
+      } else { showErr(errEl, d.error || 'Gagal mendaftar'); btn.textContent = 'Buat Akun Gratis →'; btn.disabled = false; }
+    } catch { showErr(errEl, 'Koneksi bermasalah'); btn.textContent = 'Buat Akun Gratis →'; btn.disabled = false; }
   }
+
+  function showErr(el, msg) { el.textContent = '⚠ ' + msg; el.classList.remove('hidden'); }
 </script>
 </body>
 </html>

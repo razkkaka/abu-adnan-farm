@@ -1,7 +1,7 @@
 {
-  "name": "abu-adnan-farm",
-  "version": "1.0.0",
-  "description": "",
+  "name": "abu-farm",
+  "version": "2.0.0",
+  "description": "Abu Farm - Platform Peternakan Digital",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -12,6 +12,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
     "sql.js": "^1.10.2"
   }
 }
